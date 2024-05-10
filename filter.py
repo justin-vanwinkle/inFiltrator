@@ -1,7 +1,7 @@
 import sys
 import os
 from time import sleep
-import sys
+import re
 
 # check if the user provided an input file
 if len(sys.argv) < 2:
@@ -33,11 +33,22 @@ removedLinesFile = open(removedLinesFileName, "w")
 
 print("Beginning to filter", inputFileName, "...")
 
-with open(inputFileName, "r") as fp:
-    for count, line in enumerate(fp):
-        pass
 
-print("Number of lines to process:", count + 1)
+# with open(inputFileName, "r") as fp:
+#     for count, line in enumerate(fp):
+#         pass
+def blocks(files, size=65536):
+    while True:
+        b = files.read(size)
+        if not b:
+            break
+        yield b
+
+
+with open(inputFileName, "r", encoding="utf-8", errors="ignore") as f:
+    count = sum(bl.count("\n") for bl in blocks(f)) + 1
+    print("Number of lines to process:", count)
+
 print()
 
 # for each line in input, check if it should be removed
@@ -46,7 +57,10 @@ for line in inputFile:
     sys.stdout.write("\r")
     sys.stdout.write(
         "[%-100s] %d%%"
-        % ("=" * int(100 * inputLinesCount / count), 100 * inputLinesCount / count)
+        % (
+            "=" * int(100 * inputLinesCount / (count - 1)),
+            100 * inputLinesCount / (count - 1),
+        )
     )
     sys.stdout.flush()
 
@@ -54,6 +68,15 @@ for line in inputFile:
 
     # split the line into columns
     columns = line.split("|")
+
+    # ensure the columns are digits
+    if columns[0].isdigit():
+        columns[0] = re.sub("\D", "", columns[0])
+    if columns[1].isdigit():
+        columns[1] = re.sub("\D", "", columns[1])
+    if columns[2].isdigit():
+        columns[2] = re.sub("\D", "", columns[2])
+
     # check if the line should be removed
     if (
         int(columns[0]) in BA_filter_values
@@ -87,7 +110,7 @@ print("Lines input:", inputLinesCount)
 print("Lines output:", outputLinesCount)
 print("Lines removed:", removedLinesCount)
 print("---")
-print("Filtered lines with the following values:")
+print("Filters Used:")
 print("BA:", BA_filter_values)
 print("GL:", GL_filter_values)
 print("CC:", CC_filter_values)
