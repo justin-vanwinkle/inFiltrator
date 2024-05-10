@@ -28,4 +28,8 @@ Example Command:
 
 ## Output
 
-The filtered results will be a file called `filtered-<input filename>.txt`.
+All outputs will appear in the `output` folder.
+
+The file named `filtered-<input filename>.txt` will contain your filtered result.
+
+The file named `removed_lines-<input filename>.txt` will contain all deleted lines.
